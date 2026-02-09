@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI Coach Testumgebung</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 0;
+            margin: 0;
+            background-color: #e5e5e5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 100%;
+        }
+
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #0056b3;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ccc;
+            flex-shrink: 0;
+        }
+
+        .nav-menu button {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            color: #333;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-menu button.active {
+            color: #007bff;
+            border-bottom: 3px solid #007bff;
+            background-color: #fff;
+        }
+
+        #content-container {
+            padding: 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #chat-section {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .admin-setup-area {
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 0;
+            border-radius: 0;
+            flex-shrink: 0;
+        }
+
+        .admin-setup-area h2 {
+            font-size: 1em;
+            color: #555;
+            margin-top: 0;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        #ai-response-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #fafafa;
+            border-top: 1px solid #ccc;
+            min-height: 0;
+        }
+
+        .chat-message p {
+            margin: 0 0 10px 0;
+        }
+
+        .chat-message ul {
+            padding-left: 20px;
+            margin: 5px 0 10px 0;
+        }
+
+        .chat-message li {
+            margin-bottom: 5px;
+        }
+
+        .chat-message table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            background-color: #f5f5f5;
+        }
+
+        .chat-message th,
+        .chat-message td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .chat-message th {
+            background-color: #e9e9e9;
+        }
+
+        .chat-message code {
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.4;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .chat-message b {
+            font-weight: 600;
+        }
+
+        .user-message {
+            background-color: #e1ffc7;
+            margin-left: auto;
+            text-align: left;
+        }
+
+        .ai-message {
+            background-color: #ffffff;
+            margin-right: auto;
+            text-align: left;
+            border: 1px solid #e0e0e0;
+        }
+
+        .ai-message .coach-info {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .user-message .user-info {
+            font-size: 0.8em;
+            color: #444;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .ai-actions {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            padding: 5px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .ai-actions button {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 2px 5px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .ai-actions button:hover {
+            color: #0056b3;
+        }
+
+        .chat-input-area {
+            padding: 10px 15px;
+            background-color: #f8f8f8;
+            border-top: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        #prompt-input {
+            flex-grow: 1;
+            resize: none;
+            height: 40px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            padding: 10px 15px;
+            margin-right: 10px;
+            box-sizing: border-box;
+            line-height: 20px;
+            overflow: hidden;
+        }
+
+        #sendButton {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            background-color: #007bff;
+            font-size: 1.2em;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        select,
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 5px;
+        }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .section-compact {
+            margin-bottom: 1px;
+            padding-bottom: 1px;
+            border-bottom: 1px dotted #e0e0e0;
+        }
+
+        .section-compact:last-child {
+            border-bottom: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding-top: 20px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .close-button {
+            color: #d9534f;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 40px;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            background: transparent;
+            border: none;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #c9302c;
+            text-decoration: none;
+        }
+
+        .modal-footer {
+            padding-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <div class="header">
+            <span style="font-size: 1.5em;">&#x25c0;</span>
+            <h1>AI Coaching Testumgebung</h1>
+            <span style="font-size: 1.5em;">&#x2699;</span>
+        </div>
+
+        <div class="nav-menu">
+            <button onclick="showSection('chat-section', this)" class="active">KI Chat</button>
+            <button onclick="showSection('coach-management-section', this)">Coach Verwaltung</button>
+        </div>
+
+        <div id="content-container">
+            <div id="chat-section">
+
+                <div class="admin-setup-area">
+                    <h2>Admin/Test Einstellungen</h2>
+
+                    <div class="section-compact" style="display: flex; gap: 10px;">
+                        <div style="flex-grow: 1;">
+                            <label for="user-select">Wähle Benutzer:</label>
+                            <select id="user-select">
+                                <option value="patrick_user">Patrick</option>
+                                <option value="jasmin_user">Jasmin</option>
+                                <option value="max_user">Max</option>
+                                <option value="elias_user">Elias</option>
+                            </select>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <label for="coach-select">Wähle Coach:</label>
+                            <select id="coach-select">
+                                <option value="fitness-coach">Fitness-Coach Alex</option>
+                                <option value="ernaehrungs-expertin">Ernährungsberaterin Lisa</option>
+                                <option value="elias-coach">Coach nur für Elias</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-compact">
+                        <button onclick="testConnection()">Backend-Verbindung testen</button>
+                        <button onclick="showChatHistory()"
+                            style="margin-left: 10px; background-color: #28a745;">Chatverlauf anzeigen (Modal)</button>
+                        <p id="status-message" style="margin-top: 10px; font-size: 0.9em;"></p>
+                    </div>
+
+                </div>
+
+                <div id="ai-response-container">
+                    <p style="text-align: center; color: #888; font-size: 0.8em; margin: 0 0 20px 0;">--- Live KI Chat
+                        startet hier ---</p>
+
+                </div>
+
+                <div class="chat-input-area">
+                    <textarea id="prompt-input" placeholder="Send your answer" rows="1"></textarea>
+                    <button id="sendButton" onclick="sendPrompt()">&#x27A4;</button>
+                </div>
+            </div>
+
+            <div id="coach-management-section" style="display: none; padding: 20px; flex-grow: 1;">
+                <div class="section">
+                    <h2>Coach-Einstellungen</h2>
+                    <label for="coach-manage-select">Wähle einen Coach zur Bearbeitung:</label>
+                    <select id="coach-manage-select">
+                        <option value="fitness-coach">Fitness-Coach Alex</option>
+                        <option value="ernaehrungs-expertin">Ernährungsberaterin Lisa</option>
+                        <option value="elias-coach">Coach für Elias</option>
+                    </select>
+                    <button onclick="loadCoachSettings()">Einstellungen laden</button>
+                    <div id="coach-settings-form" style="display:none; margin-top: 20px;">
+                        <h3>Einstellungen bearbeiten</h3>
+                        <label for="context-prompt-input">Kontext-Prompt:</label><br>
+                        <textarea id="context-prompt-input" rows="5" style="width:100%;"></textarea><br>
+                        <label for="api-key-input">API-Key:</label><br>
+                        <input type="text" id="api-key-input" style="width:100%;"><br>
+
+                        <label for="api-provider-select">KI-Anbieter:</label><br>
+                        <select id="api-provider-select" style="width:100%;">
+                            <option value="gemini" selected>Google Gemini</option>
+                            <option value="openai">OpenAI (ChatGPT)</option>
+                            <option value="deepseek">DeepSeek AI</option>
+                            <option value="cohere">Cohere</option>
+                        </select><br>
+
+                        <label for="model-input">KI-Modell:</label><br>
+                        <input type="text" id="model-input" list="model-list" style="width:100%;"><br>
+                        <datalist id="model-list"></datalist>
+                        <button onclick="loadAvailableModels()" style="margin-top: 5px;">Modelle laden</button>
+                        <button onclick="saveCoachSettings()" style="margin-top: 10px;">Einstellungen speichern</button>
+                        <p id="settings-status-message"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-history-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeChatHistory()">&times;</span>
+            <h2 id="modal-title"></h2>
+            <div id="chat-history-container"></div>
+            <div class="modal-footer">
+                <button onclick="closeChatHistory()">Chatverlauf schließen</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let isSending = false;
+        let lastUserQuery = null;
+
+        // ===========================================================================
+        //    MARKDOWN TO HTML CONVERSION: Formats AI response text for display
+        //    (Ihre eingefügten Funktionen)
+        // ===========================================================================
+
+        /**
+         * Konvertiert Markdown-Tabellen in HTML-Tabellen.
+         * @param {string} htmlString - Der Text, in dem nach Tabellen gesucht wird.
+         * @returns {string} - Der Text mit konvertierten Tabellen.
+         */
+        function convertTablesToHtml(htmlString) {
+            const tableRegex = /^(?:[^\n].*?\|[^\n]*\n)(?:\s*\|[\s-]*\|.*)\n(\s*\|.*\|.*(?:\n\s*\|.*\|.*)*)/gm;
+
+            htmlString = htmlString.replace(tableRegex, (match, dataRowsContent) => {
+                let tableHtml = '<table><thead><tr>';
+                let rows = match.trim().split('\n');
+
+                const headerCells = rows[0].split('|').map(c => c.trim()).filter(c => c.length > 0);
+                tableHtml += headerCells.map(cell => `<th>${cell}</th>`).join('');
+                tableHtml += '</tr></thead><tbody>';
+
+                for (let i = 2; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row.trim().startsWith('|')) continue;
+
+                    const dataCells = row.split('|').map(c => c.trim()).filter(c => c.length > 0);
+
+                    if (dataCells.length !== headerCells.length) continue;
+
+                    tableHtml += '<tr>';
+                    tableHtml += dataCells.map(cell => `<td>${cell}</td>`).join('');
+                    tableHtml += '</tr>';
+                }
+
+                tableHtml += '</tbody></table>';
+                return tableHtml;
+            });
+
+            return htmlString;
+        }
+
+        /**
+         * Konvertiert einfache Markdown-Elemente und Zeilenumbrüche in properes HTML-Markup.
+         * @param {string} markdownText - Die rohe Textantwort von der KI.
+         * @returns {string} - Der formatierte HTML-String.
+         */
+        function formatAiResponse(markdownText) {
+            if (!markdownText) return '';
+
+            let html = markdownText;
+
+            html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            html = html.replace(/^#+\s*(.*)/gm, '<b>$1</b>\n\n');
+            html = html.replace(/^[\t ]*[-*_]{3,}[\t ]*$/gm, '</p><hr><p>');
+            html = html.replace(/^[\t ]*>>?[\t ]*(.*)$/gm, '<quote-line>$1</quote-line>');
+
+            html = html.replace(/^[\t ]*\*[\t ]*[^a-zA-Z0-9\n]+$/gm, '');
+            html = html.replace(/^[\t ]*\*[\t ]*[-:| ]+$/gm, '');
+
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            html = html.replace(/\*([^\*]+)\*/g, '<i>$1</i>');
+
+            html = convertTablesToHtml(html);
+
+            html = html.replace(/^(?:[\t ]*([*-])|\d+\.)[\t ]+(.*)/gm, (match, type, content) => {
+                return 'LISTITEM_START' + content.trim().replace(/(\r\n|\r|\n)/g, '<br>') + 'LISTITEM_END';
+            });
+
+            html = html.replace(/(\r\n|\r|\n){2,}/g, '</p><p>');
+
+            html = html.replace(/(\r\n|\r|\n)/g, '<br>');
+
+            html = html.replace(/LISTITEM_START/g, '<li>').replace(/LISTITEM_END/g, '</li>');
+            html = html.replace(/<\/p><p>(<ul>.*?<\/ul>)<\/p><p>/gs, '$1');
+            html = html.replace(/(<li>.*?<\/li>)+/gs, '<ul>$&</ul>');
+
+            if (!html.startsWith('<p>') && !html.startsWith('<ul>') && !html.startsWith('<quote-line>')) {
+                html = '<p>' + html;
+            }
+
+            if ((html.startsWith('<p>') || html.startsWith('<quote-line>')) && !html.endsWith('</p>') && !html.endsWith('</ul>')) {
+                html = html + '</p>';
+            }
+
+            html = html.replace(/<p><br>/g, '<p>').replace(/<br><\/p>/g, '</p>');
+            html = html.replace(/<p><\/p>/g, '');
+            html = html.replace(/<p><ul>/g, '<ul>').replace(/<\/ul><\/p>/g, '</ul>');
+            html = html.replace(/<quote-line>/g, '<blockquote>').replace(/<\/quote-line>/g, '</blockquote>');
+
+
+            return html;
+        }
+
+        /**
+         * Führt die gesamte Logik zum "Wiederholen" (Redo) einer Anfrage durch.
+         * 1. Ruft das Backend auf, um die letzten beiden Nachrichten (User/AI) aus der DB zu löschen.
+         * 2. Lädt den Chat neu (damit die gelöschten Nachrichten verschwinden).
+         * 3. Sendet die Anfrage erneut.
+         * @param {string} query Die ursprüngliche Benutzeranfrage, die erneut gesendet werden soll.
+         * @param {HTMLElement} aiMessageElement Das KI-Nachrichtenelement, das gelöscht werden soll.
+         */
+        async function redoLastPrompt(query, aiMessageElement) {
+            const userId = document.getElementById('user-select').value;
+            const coachingId = document.getElementById('coach-select').value;
+            const responseContainer = document.getElementById('ai-response-container');
+
+            const userMessageElement = aiMessageElement.previousElementSibling;
+
+            if (!userMessageElement || !userMessageElement.classList.contains('user-message')) {
+                console.error("Redo Fehler: Konnte die letzte Benutzer-Nachricht im DOM nicht finden.");
+                responseContainer.innerHTML += `<p style="color:red; text-align: center;">Redo fehlgeschlagen: Konnte die zu löschende Benutzer-Nachricht im DOM nicht finden.</p>`;
+                return;
+            }
+
+            responseContainer.innerHTML += `<p id="redo-waiting-message" style="text-align: center; color: orange; font-size: 0.9em; margin-bottom: 10px;">Wiederhole: Bereinige Verlauf und sende neu...</p>`;
+            responseContainer.scrollTop = responseContainer.scrollHeight;
+
+            try {
+                const deleteResponse = await fetch('http://localhost:3000/api/ai/history/delete_last', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, coachingId })
+                });
+
+                if (!deleteResponse.ok) {
+                    const errorData = await deleteResponse.json();
+                    throw new Error(`DB-Löschfehler: ${errorData.error}`);
+                }
+
+                const waitingMessage = document.getElementById('redo-waiting-message');
+                if (waitingMessage) waitingMessage.remove();
+
+                await loadAndDisplayChat();
+
+                document.getElementById('prompt-input').value = query;
+                await sendPrompt();
+
+            } catch (error) {
+                console.error('Redo Fehler:', error);
+                const waitingMessage = document.getElementById('redo-waiting-message');
+                if (waitingMessage) waitingMessage.remove();
+                responseContainer.innerHTML += `<p style="color:red; text-align: center;">Redo fehlgeschlagen: ${error.message}</p>`;
+            }
+        }
+
+        /**
+         * Fügt Aktions-Buttons (wie Redo) zur KI-Nachricht hinzu.
+         * @param {HTMLElement} aiMessageElement - Das KI-Nachrichtenelement.
+         * @param {string} originalQuery - Die ursprüngliche Benutzeranfrage.
+         */
+        function addMessageActions(aiMessageElement, originalQuery) {
+            const actionsContainer = document.createElement('div');
+            actionsContainer.classList.add('ai-actions');
+
+            const repeatButton = document.createElement('button');
+            repeatButton.classList.add('action-repeat');
+            repeatButton.innerHTML = '&#x21BB; Redo';
+            repeatButton.title = 'Antwort wiederholen (Letzte Nachrichten löschen)';
+
+            repeatButton.addEventListener('click', function () {
+                redoLastPrompt(originalQuery, aiMessageElement);
+            });
+
+            actionsContainer.appendChild(repeatButton);
+            aiMessageElement.appendChild(actionsContainer);
+        }
+
+        function showSection(sectionId, button) {
+            const sections = document.querySelectorAll('#content-container > div');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'flex';
+            if (sectionId === 'chat-section') {
+                document.getElementById(sectionId).style.flexDirection = 'column';
+            }
+
+            const navButtons = document.querySelectorAll('.nav-menu button');
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        }
+
+        async function testConnection() {
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.textContent = 'Verbindung wird hergestellt...';
+            statusMessage.style.color = 'black';
+            try {
+                const response = await fetch('http://localhost:3000/api/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    statusMessage.textContent = 'Erfolgreich verbunden! Nachricht vom Server: ' + data.message;
+                    statusMessage.style.color = 'green';
+                } else {
+                    statusMessage.textContent = 'Fehler bei der Verbindung. Statuscode: ' + response.status;
+                    statusMessage.style.color = 'red';
+                }
+            } catch (error) {
+                statusMessage.textContent = 'Verbindungsfehler: Das Backend ist nicht erreichbar.';
+                statusMessage.style.color = 'red';
+                console.error('Fetch-Fehler:', error);
+            }
+        }
+
+        async function sendPrompt() {
+            const sendButton = document.getElementById('sendButton');
+            const promptInput = document.getElementById('prompt-input');
+            const promptText = promptInput.value;
+            const coachId = document.getElementById('coach-select').value;
+            const userId = document.getElementById('user-select').value;
+            const responseContainer = document.getElementById('ai-response-container');
+
+            if (!promptText.trim()) return;
+
+            if (isSending) {
+                return;
+            }
+
+            isSending = true;
+            sendButton.disabled = true;
+            promptInput.value = '';
+            lastUserQuery = promptText;
+
+            const userMessageElement = document.createElement('div');
+            userMessageElement.classList.add('chat-message', 'user-message');
+            userMessageElement.innerHTML = `<span class="user-info">From ${document.getElementById('user-select').options[document.getElementById('user-select').selectedIndex].text}:</span><p>${promptText}</p>`;
+            responseContainer.appendChild(userMessageElement);
+
+            responseContainer.innerHTML += `<p id="waiting-message" style="text-align: right; color: #888; font-size: 0.8em; margin-bottom: 10px;">Warte auf KI-Antwort...</p>`;
+            responseContainer.scrollTop = responseContainer.scrollHeight;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/ai/prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: promptText,
+                        userId: userId,
+                        coachingId: coachId
+                    })
+                });
+
+                const waitingMessage = document.getElementById('waiting-message');
+                if (waitingMessage) {
+                    waitingMessage.remove();
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    responseContainer.innerHTML += `<p style="color:red; text-align: center;">Fehler: ${errorData.error}</p>`;
+                    return;
+                }
+
+                const data = await response.json();
+
+                const aiResponseHtml = formatAiResponse(data.aiResponse);
+                const aiMessageElement = document.createElement('div');
+                aiMessageElement.classList.add('chat-message', 'ai-message');
+                aiMessageElement.innerHTML = `<span class="coach-info">From ${document.getElementById('coach-select').options[document.getElementById('coach-select').selectedIndex].text}:</span>${aiResponseHtml}`;
+                responseContainer.appendChild(aiMessageElement);
+
+                addMessageActions(aiMessageElement, promptText);
+
+
+            } catch (error) {
+                const waitingMessage = document.getElementById('waiting-message');
+                if (waitingMessage) {
+                    waitingMessage.remove();
+                }
+                console.error('Fetch-Fehler:', error);
+                responseContainer.innerHTML += `<p style="color:red; text-align: center;">Verbindungsfehler oder interner Serverfehler.</p>`;
+            } finally {
+                isSending = false;
+                sendButton.disabled = false;
+                responseContainer.scrollTop = responseContainer.scrollHeight;
+            }
+        }
+
+        async function loadCoachSettings() {
+            const coachId = document.getElementById('coach-manage-select').value;
+            const form = document.getElementById('coach-settings-form');
+            const statusMessage = document.getElementById('settings-status-message');
+
+            statusMessage.textContent = 'Lade Einstellungen...';
+            statusMessage.style.color = 'black';
+            form.style.display = 'none';
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/ai/coach/settings/${coachId}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    statusMessage.textContent = `Fehler: ${errorData.error}`;
+                    statusMessage.style.color = 'red';
+                    return;
+                }
+
+                const data = await response.json();
+                document.getElementById('context-prompt-input').value = data.context_prompt;
+                document.getElementById('api-key-input').value = data.api_key;
+                document.getElementById('model-input').value = data.model;
+
+                statusMessage.textContent = '';
+                form.style.display = 'block';
+            } catch (error) {
+                statusMessage.textContent = 'Verbindungsfehler.';
+                statusMessage.style.color = 'red';
+                console.error('Fetch-Fehler:', error);
+            }
+        }
+
+        async function saveCoachSettings() {
+            const coachId = document.getElementById('coach-manage-select').value;
+            const contextPrompt = document.getElementById('context-prompt-input').value;
+            const apiKey = document.getElementById('api-key-input').value;
+            const model = document.getElementById('model-input').value;
+            const statusMessage = document.getElementById('settings-status-message');
+
+            statusMessage.textContent = 'Speichere Einstellungen...';
+            statusMessage.style.color = 'black';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/ai/coach/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        coachingId: coachId,
+                        contextPrompt: contextPrompt,
+                        apiKey: apiKey,
+                        model: model
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    statusMessage.textContent = `Fehler: ${errorData.error}`;
+                    statusMessage.style.color = 'red';
+                    return;
+                }
+
+                statusMessage.textContent = 'Einstellungen erfolgreich gespeichert!';
+                statusMessage.style.color = 'green';
+            } catch (error) {
+                statusMessage.textContent = 'Verbindungsfehler oder interner Serverfehler.';
+                statusMessage.style.color = 'red';
+                console.error('Fetch-Fehler:', error);
+            }
+        }
+
+        async function loadAvailableModels() {
+            const apiKey = document.getElementById('api-key-input').value;
+            const provider = document.getElementById('api-provider-select').value;
+            const modelList = document.getElementById('model-list');
+            const statusMessage = document.getElementById('settings-status-message');
+
+            if (!apiKey) {
+                statusMessage.textContent = "Bitte gib zuerst einen API-Schlüssel ein.";
+                statusMessage.style.color = "orange";
+                return;
+            }
+
+            statusMessage.textContent = "Lade verfügbare Modelle...";
+            statusMessage.style.color = "black";
+            modelList.innerHTML = '';
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/ai/models?apiKey=${apiKey}&provider=${provider}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    statusMessage.textContent = `Fehler beim Laden der Modelle: ${errorData.error}`;
+                    statusMessage.style.color = "red";
+                    return;
+                }
+
+                const data = await response.json();
+                data.models.forEach(modelName => {
+                    const option = document.createElement('option');
+                    option.value = modelName;
+                    modelList.appendChild(option);
+                });
+                statusMessage.textContent = "Modelle erfolgreich geladen!";
+                statusMessage.style.color = "green";
+            } catch (error) {
+                statusMessage.textContent = "Verbindungsfehler oder interner Serverfehler.";
+                statusMessage.style.color = "red";
+                console.error('Fetch-Fehler:', error);
+            }
+        }
+
+        async function showChatHistory() {
+            const userId = document.getElementById('user-select').value;
+            const modal = document.getElementById('chat-history-modal');
+            const title = document.getElementById('modal-title');
+            const container = document.getElementById('chat-history-container');
+
+            title.textContent = `Chatverlauf für ${document.getElementById('user-select').options[document.getElementById('user-select').selectedIndex].text}`;
+            container.innerHTML = 'Lade Chatverlauf...';
+            modal.style.display = 'block';
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/ai/history?userId=${userId}`);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    container.innerHTML = `<p style="color:red;">Fehler beim Laden: ${errorData.error}</p>`;
+                    return;
+                }
+
+                const data = await response.json();
+                const history = data.history;
+
+                if (history.length === 0) {
+                    container.innerHTML = '<p>Keine Chat-Historie für diesen Benutzer.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                history.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('chat-message');
+                    const isUser = message.role === 'user';
+                    messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
+                    const roleText = isUser
+                        ? `<span class="user-info">From ${document.getElementById('user-select').options[document.getElementById('user-select').selectedIndex].text}:</span>`
+                        : `<span class="coach-info">From KI:</span>`;
+
+                    messageDiv.innerHTML = `${roleText}<p>${message.message}</p>`;
+                    container.appendChild(messageDiv);
+                });
+
+            } catch (error) {
+                console.error('Fetch-Fehler:', error);
+                container.innerHTML = `<p style="color:red;">Verbindungsfehler oder interner Serverfehler.</p>`;
+            }
+        }
+
+        function closeChatHistory() {
+            const modal = document.getElementById('chat-history-modal');
+            modal.style.display = 'none';
+        }
+
+        async function loadAndDisplayChat() {
+            const userId = document.getElementById('user-select').value;
+            const coachingId = document.getElementById('coach-select').value;
+            const responseContainer = document.getElementById('ai-response-container');
+
+            if (!userId || !coachingId) return;
+
+            responseContainer.innerHTML = '<p style="text-align: center; color: #555;">Lade Chat-Historie...</p>';
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/ai/history?userId=${userId}&coachingId=${coachingId}`);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    responseContainer.innerHTML = `<p style="color:red; text-align: center;">Fehler beim Laden des Chats: ${errorData.error}</p>`;
+                    return;
+                }
+
+                const data = await response.json();
+                const history = data.history;
+
+                responseContainer.innerHTML = '';
+
+                let lastUserMessage = null;
+
+                history.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('chat-message', message.role === 'user' ? 'user-message' : 'ai-message');
+
+                    const roleText = message.role === 'user'
+                        ? `<span class="user-info">From ${document.getElementById('user-select').options[document.getElementById('user-select').selectedIndex].text}:</span>`
+                        : `<span class="coach-info">From ${document.getElementById('coach-select').options[document.getElementById('coach-select').selectedIndex].text}:</span>`;
+
+                    const content = message.role === 'model'
+                        ? formatAiResponse(message.message)
+                        : `<p>${message.message}</p>`;
+
+                    messageDiv.innerHTML = `${roleText}${content}`;
+                    responseContainer.appendChild(messageDiv);
+
+                    if (message.role === 'user') {
+                        lastUserMessage = message.message;
+                    } else if (message.role === 'model' && lastUserMessage) {
+                        addMessageActions(messageDiv, lastUserMessage);
+                    }
+                });
+
+                responseContainer.scrollTop = responseContainer.scrollHeight;
+
+                lastUserQuery = lastUserMessage;
+
+            } catch (error) {
+                console.error('Fehler beim Neuladen des Chats:', error);
+                responseContainer.innerHTML = `<p style="color:red; text-align: center;">Verbindungsfehler oder interner Serverfehler beim Laden des Chats.</p>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('chat-section', document.querySelector('.nav-menu button.active'));
+
+            document.getElementById('user-select').addEventListener('change', loadAndDisplayChat);
+            document.getElementById('coach-select').addEventListener('change', loadAndDisplayChat);
+
+            loadAndDisplayChat();
+        });
+
+
+    </script>
+</body>
+
+</html>
